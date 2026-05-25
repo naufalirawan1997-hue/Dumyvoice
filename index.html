@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taksasi — Voice Demo</title>
+<meta name="theme-color" content="#2563eb">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f9;--surface:#fff;--border:#e2e8f0;
+  --blue:#2563eb;--blue-light:#eff6ff;--blue-mid:#bfdbfe;--blue-dark:#1d4ed8;
+  --gray:#64748b;--gray-light:#f8fafc;--gray-mid:#e2e8f0;
+  --text:#0f172a;--text2:#475569;
+  --green:#16a34a;--green-bg:#f0fdf4;
+  --red:#dc2626;--red-bg:#fef2f2;
+  --amber:#d97706;--amber-bg:#fffbeb;
+  --purple:#7c3aed;--purple-light:#f5f3ff;--purple-mid:#ddd6fe;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding-bottom:80px;}
+
+/* TOPBAR */
+.topbar{background:var(--blue);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(37,99,235,.3);}
+.topbar-brand{display:flex;align-items:center;gap:10px;}
+.topbar-icon{width:34px;height:34px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.topbar-title{font-size:15px;font-weight:700;color:#fff;}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,.7);}
+.demo-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;font-size:11px;color:#fff;font-weight:600;}
+
+/* CONTAINER */
+.container{max-width:720px;margin:0 auto;padding:20px 16px 0;}
+
+/* TABS */
+.tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow);}
+.tab{flex:1;padding:12px;font-size:13px;font-weight:600;background:transparent;border:none;color:var(--gray);cursor:pointer;touch-action:manipulation;font-family:inherit;}
+.tab.active{background:var(--blue);color:#fff;}
+.page{display:none;}.page.active{display:block;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow);}
+.card-title{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:16px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px;}
+.card-icon{width:26px;height:26px;background:var(--blue-light);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr;}}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;}
+input[type="text"],input[type="date"],select,textarea{
+  background:var(--gray-light);border:1.5px solid var(--border);border-radius:8px;
+  padding:10px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;
+  outline:none;width:100%;transition:border-color .2s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff;}
+textarea{resize:vertical;min-height:88px;line-height:1.6;}
+
+/* VOICE WRAP */
+.vi-wrap{display:flex;align-items:stretch;}
+.vi-wrap input,.vi-wrap select,.vi-wrap textarea{
+  border-radius:8px 0 0 8px !important;border-right:none !important;flex:1;
+}
+.vi-btn{
+  width:38px;flex-shrink:0;
+  background:var(--gray-light);border:1.5px solid var(--border);border-left:none;
+  border-radius:0 8px 8px 0;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;transition:all .2s;touch-action:manipulation;padding:0;
+}
+.vi-btn:hover{background:var(--blue-light);border-color:var(--blue-mid);}
+.vi-btn.vi-on{background:#fef2f2;border-color:#fca5a5;}
+.vi-btn.vi-on span{animation:vi-pulse .5s ease-in-out infinite alternate;}
+@keyframes vi-pulse{from{transform:scale(1);}to{transform:scale(1.3);}}
+.vi-wrap.vi-listening input,.vi-wrap.vi-listening select,.vi-wrap.vi-listening textarea{
+  border-color:#ef4444 !important;background:#fff5f5 !important;
+}
+
+/* ITEM ROW */
+.item-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.item-row{display:grid;grid-template-columns:1fr 148px 34px 32px;gap:8px;align-items:center;}
+@media(max-width:480px){.item-row{grid-template-columns:1fr 100px 30px 28px;}}
+.item-name-input{background:var(--gray-light);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;width:100%;}
+.item-name-input:focus{border-color:var(--blue);background:#fff;}
+.rp-input{background:var(--gray-light);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--blue-dark);font-family:'DM Mono',monospace;font-size:13px;outline:none;width:100%;}
+.rp-input:focus{border-color:var(--blue);background:#fff;}
+.btn-del{width:34px;height:36px;background:var(--red-bg);border:1.5px solid #fecaca;border-radius:8px;color:var(--red);font-size:14px;cursor:pointer;flex-shrink:0;touch-action:manipulation;}
+.btn-mic-row{width:32px;height:36px;background:var(--gray-light);border:1.5px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;flex-shrink:0;touch-action:manipulation;display:flex;align-items:center;justify-content:center;}
+.btn-mic-row.vi-on{background:#fef2f2;border-color:#fca5a5;}
+.btn-add{width:100%;padding:9px;background:var(--blue-light);border:1.5px dashed var(--blue-mid);border-radius:8px;color:var(--blue);font-size:13px;font-weight:500;cursor:pointer;margin-bottom:14px;touch-action:manipulation;font-family:inherit;}
+.total-bar{background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:10px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;}
+.total-label{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;}
+.total-value{font-family:'DM Mono',monospace;font-size:18px;font-weight:600;color:var(--blue-dark);}
+.grand-card{background:var(--blue);border-radius:14px;padding:22px;text-align:center;margin-top:4px;margin-bottom:16px;}
+.grand-label{font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;}
+.grand-value{font-family:'DM Mono',monospace;font-size:36px;font-weight:700;color:#fff;}
+
+/* NOTE */
+.note-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:4px;margin-bottom:16px;}
+.note-title{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:8px;text-transform:uppercase;}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.btn{flex:1;min-width:80px;padding:12px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;touch-action:manipulation;}
+.btn-secondary{background:var(--gray-light);color:var(--gray);border:1.5px solid var(--border);}
+.btn-save{background:var(--blue);color:#fff;}
+
+/* SAVED LIST */
+.search-wrap{position:relative;margin-bottom:14px;display:flex;}
+.search-input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px 0 0 10px;padding:11px 16px;font-size:14px;color:var(--text);outline:none;border-right:none;}
+.search-input:focus{border-color:var(--blue);}
+.search-mic{width:42px;background:var(--gray-light);border:1.5px solid var(--border);border-left:none;border-radius:0 10px 10px 0;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
+.search-mic.vi-on{background:#fef2f2;border-color:#fca5a5;}
+.report-item{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;box-shadow:var(--shadow);}
+.report-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.report-info{flex:1;}
+.nopol-badge{background:var(--blue);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:5px;font-family:'DM Mono',monospace;display:inline-block;margin-bottom:4px;}
+.report-sub{font-size:12px;color:var(--text2);margin-bottom:2px;}
+.report-meta{font-size:11px;color:var(--gray);margin-top:3px;}
+.report-total{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--blue-dark);margin-top:5px;background:var(--blue-light);display:inline-block;padding:3px 10px;border-radius:5px;}
+.report-actions{display:flex;gap:6px;flex-shrink:0;}
+.btn-icon{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--border);background:var(--gray-light);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
+.btn-icon.rm{border-color:#fecaca;color:var(--red);background:var(--red-bg);}
+.empty-state{text-align:center;padding:56px 20px;}
+.empty-icon{font-size:44px;margin-bottom:12px;}
+.empty-text{font-size:14px;color:var(--text2);line-height:1.6;}
+
+/* BANNER */
+.demo-banner{background:var(--amber-bg);border:1.5px solid #fde68a;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:10px;}
+
+/* LISTENING BAR */
+#vi-bar{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;border-radius:30px;padding:11px 22px;font-size:13px;font-weight:600;z-index:9999;align-items:center;gap:12px;box-shadow:0 8px 30px rgba(0,0,0,.35);min-width:230px;justify-content:center;}
+#vi-bar.show{display:flex;}
+#vi-bar-lbl{font-size:10px;color:#fde68a;font-weight:600;margin-top:2px;}
+.vi-dots span{width:5px;height:5px;border-radius:50%;background:#ef4444;display:inline-block;margin:0 2px;animation:vdot .8s ease-in-out infinite;}
+.vi-dots span:nth-child(2){animation-delay:.15s;}
+.vi-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes vdot{0%,100%{transform:scaleY(1);}50%{transform:scaleY(2.2);}}
+#vi-stop-btn{background:#ef4444;border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+
+/* TOAST */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);font-size:13px;font-weight:600;padding:11px 20px;border-radius:24px;opacity:0;transition:all .35s;z-index:9998;pointer-events:none;color:#fff;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-icon">🎤</div>
+    <div>
+      <div class="topbar-title">Taksasi — Voice Demo</div>
+      <div class="topbar-sub">Uji coba voice input</div>
+    </div>
+  </div>
+  <div class="demo-pill">🧪 DUMMY</div>
+</div>
+
+<div class="container">
+  <div class="demo-banner">⚠️ <span><b>Mode Demo</b> — Data tersimpan di memori browser, tidak konek Firebase.</span></div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-form" onclick="switchTab('form')">📋 Form</button>
+    <button class="tab" id="tab-saved" onclick="switchTab('saved')">🗂 Tersimpan</button>
+  </div>
+
+  <!-- PAGE FORM -->
+  <div class="page active" id="page-form">
+
+    <div class="card">
+      <div class="card-title"><div class="card-icon">📋</div>Informasi Kendaraan</div>
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label>Nama Appraisal *</label>
+          <select id="nama_appraisal">
+            <option value="">— Pilih Nama —</option>
+            <option>Arif</option><option>Imam</option><option>Naufal</option>
+            <option>Prasetyo</option><option>Ilham</option><option>Zulfi</option>
+            <option>Gandhi</option><option>Matius</option><option>Agisna</option><option>Udin</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>Balai Lelang *</label>
+          <select id="balai">
+            <option value="">— Pilih Balai —</option>
+            <option>ADIRA</option><option>ALTO</option><option>ASTRIA</option><option>AUKSI</option>
+            <option>CAREADY</option><option>HYBID</option><option>IBID</option><option>JBA</option>
+            <option>OTOBID</option><option>OTOLINK</option><option>OTOMAS</option><option>SMARTBID</option>
+            <option>TRIBIK</option><option>TUNAS</option><option>UC</option><option>GROSIR MOBIL</option>
+            <option>INDO LELANG</option><option>MSL</option><option>LEGOAS</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>Cabang *</label>
+          <select id="cabang">
+            <option value="">— Pilih Cabang —</option>
+            <option>JAKARTA</option><option>BANDUNG</option><option>JAKARTA RAYA</option>
+            <option>JAKARTA TIPAR</option><option>CIKUNIR</option><option>CIRACAS</option>
+            <option>TANGERANG</option><option>TANGERANG SELATAN</option><option>DEPOK</option>
+            <option>BEKASI</option><option>KARAWANG</option><option>KALIMALANG</option>
+            <option>RADEN INTEN</option><option>SURABAYA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Nomor Lot *</label>
+          <div class="vi-wrap" id="vw-lot">
+            <input type="text" id="lot" placeholder="Contoh: 45" inputmode="numeric">
+            <button class="vi-btn" onclick="viStart('lot','Nomor Lot','num')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Nomor Polisi *</label>
+          <div class="vi-wrap" id="vw-nopol">
+            <input type="text" id="nopol" placeholder="Contoh: B 1234 XYZ">
+            <button class="vi-btn" onclick="viStart('nopol','Nomor Polisi','nopol')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label>Type *</label>
+          <div class="vi-wrap" id="vw-type">
+            <input type="text" id="type" placeholder="Contoh: AVANZA G 1.3 NEW">
+            <button class="vi-btn" onclick="viStart('type','Type Kendaraan','upper')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tahun *</label>
+          <div class="vi-wrap" id="vw-tahun">
+            <input type="text" id="tahun" placeholder="2020" inputmode="numeric" maxlength="4">
+            <button class="vi-btn" onclick="viStart('tahun','Tahun','year')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Warna *</label>
+          <select id="warna">
+            <option value="">— Pilih —</option>
+            <option>HITAM</option><option>PUTIH</option><option>ABU</option>
+            <option>SILVER</option><option>MERAH</option><option>KUNING</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Transmisi *</label>
+          <select id="transmisi">
+            <option value="">— Pilih —</option>
+            <option>AT</option><option>MT</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Kilometer *</label>
+          <div class="vi-wrap" id="vw-km">
+            <input type="text" id="km" placeholder="Contoh: 85000" inputmode="numeric">
+            <button class="vi-btn" onclick="viStart('km','Kilometer','km')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal Pajak</label>
+          <input type="date" id="tgl_pajak">
+        </div>
+
+        <div class="form-group">
+          <label>Estimasi BPKB</label>
+          <div class="vi-wrap" id="vw-est_bpkb">
+            <input type="text" id="est_bpkb" placeholder="Contoh: 21 juta / tidak ada">
+            <button class="vi-btn" onclick="viStart('est_bpkb','Est. BPKB','text')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>HDL — Harga Dasar Lelang *</label>
+          <div class="vi-wrap" id="vw-hdl">
+            <input type="text" id="hdl" placeholder="Contoh: 80000000" inputmode="numeric" data-raw="">
+            <button class="vi-btn" onclick="viStart('hdl','HDL','nominal')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Pajak / Biaya Dokumen</label>
+          <div class="vi-wrap" id="vw-pajak_dokumen">
+            <input type="text" id="pajak_dokumen" placeholder="Contoh: 4000000" inputmode="numeric" data-raw="">
+            <button class="vi-btn" onclick="viStart('pajak_dokumen','Pajak/Dok','nominal')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Admin Lelang</label>
+          <div class="vi-wrap" id="vw-admin_lelang">
+            <input type="text" id="admin_lelang" placeholder="Rp 0" inputmode="numeric" data-raw="">
+            <button class="vi-btn" onclick="viStart('admin_lelang','Admin Lelang','nominal')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Estimasi Salon</label>
+          <div class="vi-wrap" id="vw-salon">
+            <input type="text" id="salon" placeholder="Rp 0" inputmode="numeric" data-raw="">
+            <button class="vi-btn" onclick="viStart('salon','Est. Salon','nominal')"><span>🎤</span></button>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label>Status Unit *</label>
+          <select id="status_unit">
+            <option value="">— Pilih Status —</option>
+            <option>RETAIL</option><option>LELANG</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BODY REPAIR -->
+    <div class="card">
+      <div class="card-title"><div class="card-icon">🚗</div>A. Body Repair</div>
+      <div class="item-list" id="body-list"></div>
+      <button class="btn-add" onclick="addRow('body')">+ Tambah Item Body Repair</button>
+      <div class="total-bar">
+        <span class="total-label">Total Body Repair</span>
+        <span class="total-value" id="total-body">Rp 0</span>
+      </div>
+    </div>
+
+    <!-- GENERAL REPAIR -->
+    <div class="card">
+      <div class="card-title"><div class="card-icon">🔩</div>B. General Repair</div>
+      <div class="item-list" id="general-list"></div>
+      <button class="btn-add" onclick="addRow('general')">+ Tambah Item General Repair</button>
+      <div class="total-bar">
+        <span class="total-label">Total General Repair</span>
+        <span class="total-value" id="total-general">Rp 0</span>
+      </div>
+    </div>
+
+    <!-- GRAND TOTAL -->
+    <div class="grand-card">
+      <div class="grand-label">⚡ Total Estimasi Biaya Perbaikan</div>
+      <div class="grand-value" id="grand-total">Rp 0</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:6px;">Pajak/Dok + Admin + Salon + Body + General</div>
+    </div>
+
+    <!-- NOTE -->
+    <div class="note-card">
+      <div class="note-title"><div class="card-icon">📝</div>Note / Catatan</div>
+      <div class="vi-wrap" id="vw-note">
+        <textarea id="note" placeholder="Contoh: Mesin normal, AC dingin, interior bersih." style="border-radius:8px 0 0 8px;border-right:none;flex:1;"></textarea>
+        <button class="vi-btn" style="border-radius:0 8px 8px 0;align-self:stretch;height:auto;" onclick="viStart('note','Catatan','text')"><span>🎤</span></button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="resetAll()">↺ Reset</button>
+      <button class="btn btn-save" onclick="simpanDummy()">💾 Simpan</button>
+    </div>
+  </div>
+
+  <!-- PAGE SAVED -->
+  <div class="page" id="page-saved">
+    <div class="search-wrap">
+      <input class="search-input" id="search-input" type="text" placeholder="Cari nopol..." oninput="renderSaved(this.value)">
+      <button class="search-mic" id="search-mic" onclick="viStart('search-input','Cari Nopol','nopol')">🎤</button>
+    </div>
+    <div id="saved-list"></div>
+  </div>
+
+</div>
+
+<!-- LISTENING BAR -->
+<div id="vi-bar">
+  <div class="vi-dots"><span></span><span></span><span></span></div>
+  <div>
+    <div>Mendengarkan...</div>
+    <div id="vi-bar-lbl"></div>
+  </div>
+  <button id="vi-stop-btn" onclick="viStop()">STOP</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══ STATE ══
+var allReports = [];
+var cntRow = {body:0, general:0};
+
+// ══ HELPERS ══
+function $(id){ return document.getElementById(id); }
+function toRaw(v){ return v.replace(/[^\d]/g,''); }
+function rpDisp(r){ if(!r) return ''; var n=parseInt(r,10); return isNaN(n)?'':'Rp '+n.toLocaleString('id-ID'); }
+function rpTot(n){ return 'Rp '+Math.round(n).toLocaleString('id-ID'); }
+function nv(el){ return parseInt(el.dataset.raw||'0',10)||0; }
+
+function showToast(msg,bg){
+  var t=$('toast'); t.textContent=msg; t.style.background=bg||'#16a34a';
+  t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+function switchTab(t){
+  ['form','saved'].forEach(function(x){
+    $('tab-'+x).classList.toggle('active',x===t);
+    $('page-'+x).classList.toggle('active',x===t);
+  });
+  if(t==='saved') renderSaved($('search-input').value);
+}
+
+// ══ ITEM ROWS ══
+function addRow(s){
+  var id = s+'_'+(++cntRow[s]);
+  var row = document.createElement('div');
+  row.className = 'item-row'; row.id = id;
+  var nameId = id+'_name';
+  var rpId   = id+'_rp';
+  row.innerHTML =
+    '<input class="item-name-input" type="text" id="'+nameId+'" placeholder="Nama item">'+
+    '<input class="rp-input" type="text" id="'+rpId+'" placeholder="Rp 0" inputmode="numeric" data-raw="">'+
+    '<button class="btn-del" onclick="this.parentNode.remove();calcTotal(\''+s+'\')">✕</button>'+
+    '<button class="btn-mic-row" onclick="viStartEl(document.getElementById(\''+nameId+'\'),\'Nama Item\',\'title\')">🎤</button>';
+  var rpInp = row.querySelector('.rp-input');
+  rpInp.addEventListener('focus', function(){ this.value = this.dataset.raw||''; });
+  rpInp.addEventListener('input', function(){ var r=toRaw(this.value); this.dataset.raw=r; calcTotal(s); });
+  rpInp.addEventListener('blur',  function(){ var r=toRaw(this.value); this.dataset.raw=r; this.value=rpDisp(r); calcTotal(s); });
+  $(s+'-list').appendChild(row);
+  row.querySelector('.item-name-input').focus();
+  calcTotal(s);
+}
+
+function calcTotal(s){
+  var t=0, list=$(s+'-list').querySelectorAll('.rp-input');
+  for(var i=0;i<list.length;i++) t+=nv(list[i]);
+  $('total-'+s).textContent=rpTot(t);
+  hitungGrand();
+}
+
+function hitungGrand(){
+  var tB=0,tG=0;
+  $('body-list').querySelectorAll('.rp-input').forEach(function(e){tB+=nv(e);});
+  $('general-list').querySelectorAll('.rp-input').forEach(function(e){tG+=nv(e);});
+  var pajak  = parseInt(($('pajak_dokumen').dataset.raw)||'0')||0;
+  var admin  = parseInt(($('admin_lelang').dataset.raw)||'0')||0;
+  var salon  = parseInt(($('salon').dataset.raw)||'0')||0;
+  $('grand-total').textContent = rpTot(tB+tG+pajak+admin+salon);
+}
+
+// Rp input binding untuk field utama
+['hdl','pajak_dokumen','admin_lelang','salon'].forEach(function(id){
+  var el=$(id);
+  if(!el) return;
+  el.addEventListener('focus', function(){ this.value=this.dataset.raw||''; });
+  el.addEventListener('input', function(){ toRaw(this.value); hitungGrand(); });
+  el.addEventListener('blur',  function(){ var r=toRaw(this.value); this.dataset.raw=r; this.value=rpDisp(r); hitungGrand(); });
+});
+
+function getItems(s){
+  var items=[], rows=$(s+'-list').querySelectorAll('.item-row');
+  rows.forEach(function(r){
+    var name=r.querySelector('.item-name-input').value.trim();
+    var price=nv(r.querySelector('.rp-input'));
+    if(name||price) items.push({name:name||'(tanpa nama)',price:price});
+  });
+  return items;
+}
+
+// ══ SIMPAN DUMMY ══
+function simpanDummy(){
+  var nopol=$('nopol').value.trim();
+  if(!nopol){ showToast('Isi Nomor Polisi dulu!','#f59e0b'); return; }
+  var now = new Date();
+  var savedAt = now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})+
+                ' '+now.getHours().toString().padStart(2,'0')+'.'+now.getMinutes().toString().padStart(2,'0');
+  var body=getItems('body'), general=getItems('general');
+  var tB=body.reduce(function(a,i){return a+i.price;},0);
+  var tG=general.reduce(function(a,i){return a+i.price;},0);
+  var pajak=parseInt($('pajak_dokumen').dataset.raw||'0')||0;
+  var admin=parseInt($('admin_lelang').dataset.raw||'0')||0;
+  var salon=parseInt($('salon').dataset.raw||'0')||0;
+  var grand=tB+tG+pajak+admin+salon;
+  var r={
+    _key: 'k'+Date.now(),
+    savedAt:savedAt,
+    nama_appraisal:$('nama_appraisal').value,
+    balai:$('balai').value, cabang:$('cabang').value,
+    lot:$('lot').value, nopol:nopol,
+    type:$('type').value, tahun:$('tahun').value,
+    warna:$('warna').value, transmisi:$('transmisi').value,
+    km:$('km').value, tgl_pajak:$('tgl_pajak').value,
+    est_bpkb:$('est_bpkb').value,
+    hdl:parseInt($('hdl').dataset.raw||'0')||0,
+    pajak_dokumen:pajak, admin_lelang:admin, salon:salon,
+    status_unit:$('status_unit').value,
+    body:body, general:general,
+    totalBody:tB, totalGeneral:tG, grand:grand,
+    note:$('note').value
+  };
+  allReports.unshift(r);
+  showToast('✅ Tersimpan: '+nopol,'#16a34a');
+  resetAll();
+  switchTab('saved');
+}
+
+// ══ RESET ══
+function resetAll(){
+  ['nama_appraisal','balai','cabang','warna','transmisi','status_unit'].forEach(function(id){
+    var el=$(id); if(el) el.value='';
+  });
+  ['lot','nopol','type','tahun','km','tgl_pajak','est_bpkb','note'].forEach(function(id){
+    var el=$(id); if(el) el.value='';
+  });
+  ['hdl','pajak_dokumen','admin_lelang','salon'].forEach(function(id){
+    var el=$(id); if(el){el.value='';el.dataset.raw='';}
+  });
+  $('body-list').innerHTML=''; $('general-list').innerHTML='';
+  cntRow={body:0,general:0};
+  $('total-body').textContent='Rp 0';
+  $('total-general').textContent='Rp 0';
+  $('grand-total').textContent='Rp 0';
+}
+
+// ══ RENDER SAVED ══
+function renderSaved(q){
+  var list=$('saved-list');
+  var filtered=allReports.filter(function(r){
+    return !q || r.nopol.toLowerCase().includes(q.toLowerCase());
+  });
+  if(!filtered.length){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🗂</div><div class="empty-text">'+(allReports.length?'Tidak ditemukan.':'Belum ada data tersimpan.')+'</div></div>';
+    return;
+  }
+  list.innerHTML=filtered.map(function(r){
+    return '<div class="report-item">'+
+      '<div class="report-top">'+
+        '<div class="report-info">'+
+          '<div class="nopol-badge">'+r.nopol+'</div>'+
+          '<div class="report-sub">'+r.type+' '+r.tahun+' — '+r.warna+' '+r.transmisi+'</div>'+
+          '<div class="report-sub">'+r.balai+' / '+r.cabang+' — Lot '+r.lot+'</div>'+
+          '<div class="report-meta">'+r.savedAt+'</div>'+
+          '<div class="report-total">Total: Rp '+(r.grand||0).toLocaleString('id-ID')+'</div>'+
+        '</div>'+
+        '<div class="report-actions">'+
+          '<button class="btn-icon rm" onclick="hapusReport(\''+r._key+'\')" title="Hapus">🗑</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function hapusReport(key){
+  if(!confirm('Hapus data ini?')) return;
+  allReports=allReports.filter(function(r){return r._key!==key;});
+  renderSaved($('search-input').value);
+  showToast('Data dihapus','#dc2626');
+}
+
+// ══════════════════════════════════════════════
+// VOICE INPUT ENGINE
+// ══════════════════════════════════════════════
+(function(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var _rec=null, _on=false, _el=null, _wrap=null, _btn=null;
+
+  if(!SR){
+    document.querySelectorAll('.vi-btn,.btn-mic-row,.search-mic').forEach(function(b){
+      b.title='Browser tidak support mic. Pakai Chrome!';
+      b.style.opacity='.4';
+    });
+  }
+
+  function parseNominal(raw){
+    var s=raw.toLowerCase().replace(/[.,]/g,''), res=0;
+    var j=s.match(/(\d+)\s*juta/), r=s.match(/(\d+)\s*ribu/), rt=s.match(/(\d+)\s*ratus/);
+    if(j) res+=parseInt(j[1])*1000000;
+    if(r) res+=parseInt(r[1])*1000;
+    if(rt) res+=parseInt(rt[1])*100;
+    if(!res){ var d=s.replace(/\D/g,''); res=parseInt(d)||0; }
+    return res?res.toString():raw;
+  }
+
+  function process(raw,mode){
+    switch(mode){
+      case 'nopol': return raw.toUpperCase();
+      case 'upper': return raw.toUpperCase();
+      case 'year':  var m=raw.match(/\d{4}/); return m?m[0]:raw.replace(/\D/g,'').slice(0,4);
+      case 'num':   return raw.replace(/\D/g,'');
+      case 'km':
+        var lo=raw.toLowerCase();
+        if(lo.includes('ribu')){ var n=raw.match(/(\d+)/); return n?(parseInt(n[1])*1000).toString():raw; }
+        return raw.replace(/\D/g,'')||raw;
+      case 'nominal': return parseNominal(raw);
+      case 'title': return raw.replace(/\b\w/g,function(c){return c.toUpperCase();});
+      default: return raw;
+    }
+  }
+
+  function fillEl(el, raw, mode){
+    var val=process(raw,mode);
+    if(el.dataset && el.dataset.raw!==undefined){
+      var num=parseInt(val.replace(/\D/g,''))||0;
+      el.dataset.raw=num.toString();
+      el.value=num?'Rp '+num.toLocaleString('id-ID'):'';
+      el.dispatchEvent(new Event('blur'));
+      hitungGrand();
+    } else {
+      el.value=val;
+      el.dispatchEvent(new Event('input'));
+    }
+    showToast('✓ '+val.substring(0,28),'#16a34a');
+  }
+
+  function bar(show,lbl){
+    var b=$('vi-bar');
+    if(show){b.classList.add('show');$('vi-bar-lbl').textContent=lbl||'';}
+    else{b.classList.remove('show');}
+  }
+
+  function startCore(el,lbl,mode){
+    if(!SR){showToast('Pakai Chrome untuk fitur mic!','#dc2626');return;}
+    if(_on){viStop();return;}
+    _el=el; _on=true;
+    _wrap=el.closest?el.closest('.vi-wrap'):null;
+    if(_wrap){_wrap.classList.add('vi-listening');_btn=_wrap.querySelector('.vi-btn,.btn-mic-row,.search-mic');}
+    else{_btn=null;}
+    if(_btn) _btn.classList.add('vi-on');
+    bar(true,'📌 '+lbl);
+    _rec=new SR();
+    _rec.lang='id-ID'; _rec.continuous=false; _rec.interimResults=false;
+    _rec.onresult=function(e){
+      var txt='';
+      for(var i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal) txt+=e.results[i][0].transcript;
+      if(txt) fillEl(_el,txt.trim(),mode);
+    };
+    _rec.onerror=function(e){
+      if(e.error==='not-allowed') showToast('Izin mic ditolak — buka via HTTPS (GitHub Pages)','#dc2626');
+      else if(e.error==='no-speech') showToast('Tidak terdengar, coba lagi 🎤','#f59e0b');
+      else showToast('Error: '+e.error,'#dc2626');
+      viStop();
+    };
+    _rec.onend=function(){viStop();};
+    _rec.start();
+  }
+
+  window.viStart=function(id,lbl,mode){
+    var el=$(id); if(el) startCore(el,lbl,mode||'text');
+  };
+  window.viStartEl=function(el,lbl,mode){
+    if(el) startCore(el,lbl,mode||'text');
+  };
+  window.viStop=function(){
+    _on=false;
+    if(_rec){try{_rec.stop();}catch(e){}_rec=null;}
+    if(_wrap) _wrap.classList.remove('vi-listening');
+    if(_btn)  _btn.classList.remove('vi-on');
+    bar(false); _el=null; _wrap=null; _btn=null;
+  };
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&_on)viStop();});
+})();
+
+hitungGrand();
+</script>
+</body>
+</html>
